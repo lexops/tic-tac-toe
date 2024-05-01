@@ -7,11 +7,18 @@
 
 body {
   height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 h1 {
   text-align: center;
   margin-top: 1rem;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  color: gray;
 }
 
 .board {
@@ -30,8 +37,97 @@ h1 {
   font-size: 3rem;
 }
 
+.cell:hover {
+  cursor: pointer;
+  outline: 2px solid cornflowerblue;
+}
+
 .player-turn {
   margin-top: 1rem;
   text-align: center;
-  font-size: 1.5rem;
+  font-size: 1.25rem;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: gray;
+  letter-spacing: 5px;
+
+}
+
+.start,
+.restart {
+  text-transform: uppercase;
+  padding: 1rem;
+  border-radius: 10px;
+  border-style: none;
+  font-weight: 700;
+  letter-spacing: 5px;
+  margin: 2rem auto;
+  display: block;
+  background-color: cornflowerblue;
+  color: white;
+  border: 2px solid cornflowerblue;
+}
+
+.restart {
+  position: absolute;
+}
+
+
+.start:hover,
+.restart:hover {
+  background-color: white;
+  color: cornflowerblue;
+  border-color: cornflowerblue;
+  cursor: pointer;
+}
+
+form p {
+  margin: 1rem auto;
+  text-align: center;
+}
+
+form p label {
+  display: block;
+  font-weight: 700;
+  color: gray;
+  font-size: .8rem;
+  letter-spacing: 3px;
+}
+
+form input {
+  margin-top: 5px;
+  height: 1.5rem;
+  border-radius: 10px;
+  padding: 1rem;
+  border: 1px solid gray;
+  width: 200px;
+  font-weight: 700;
+  color: gray;
+  font-size: 1rem;
+}
+
+form input:active,
+form input:focus {
+  outline: none;
+  border-color: cornflowerblue;
+}
+
+form button {
+  display: block;
+  margin: 1rem auto;
+  padding: .7rem;
+  border-radius: 15px;
+  border: 1px solid cornflowerblue;
+  background-color: cornflowerblue;
+  color: white;
+  font-weight: 700;
+  letter-spacing: 3px;
+  width: 200px;
+}
+
+form button:hover{
+  cursor: pointer;
+  background-color: white;
+  border-color: cornflowerblue;
+  color: cornflowerblue;
 }

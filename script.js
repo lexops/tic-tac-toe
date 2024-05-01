@@ -14,7 +14,11 @@ const gameboard = (function Gameboard() {
     board[index].setValue(mark)
   }   
 
-  return { getBoard, printBoard, placeMark }
+  const resetBoard = () => {
+    board.forEach(cell => cell.setValue(" "))
+  }
+
+  return { getBoard, printBoard, placeMark, resetBoard }
 })()
 
 
@@ -29,6 +33,10 @@ function Cell(){
 }
 
 function GameController(playerOne, playerTwo) {
+  let result 
+
+  const getResult = () => result
+
   const players = [
     {
       name: playerOne,
@@ -61,77 +69,104 @@ function GameController(playerOne, playerTwo) {
 
     // Check for winner or tie
     const board = gameboard.getBoard()
+    const mark = getActivePlayer().mark
 
     const winConditions = [
       (
-       board[0] === getActivePlayer().mark &&
-       board[1] === getActivePlayer().mark &&
-       board[2] === getActivePlayer().mark 
+       board[0] === mark &&
+       board[1] === mark &&
+       board[2] === mark 
       ),
       (
-       board[3] === getActivePlayer().mark &&
-       board[4] === getActivePlayer().mark &&
-       board[5] === getActivePlayer().mark 
+       board[3] === mark &&
+       board[4] === mark &&
+       board[5] === mark 
       ),
       (
-       board[6] === getActivePlayer().mark &&
-       board[7] === getActivePlayer().mark &&
-       board[8] === getActivePlayer().mark 
+       board[6] === mark &&
+       board[7] === mark &&
+       board[8] === mark 
       ),
       (
-       board[0] === getActivePlayer().mark &&
-       board[3] === getActivePlayer().mark &&
-       board[6] === getActivePlayer().mark 
+       board[0] === mark &&
+       board[3] === mark &&
+       board[6] === mark 
       ),
       (
-       board[1] === getActivePlayer().mark &&
-       board[4] === getActivePlayer().mark &&
-       board[7] === getActivePlayer().mark 
+       board[1] === mark &&
+       board[4] === mark &&
+       board[7] === mark 
       ),
       (
-       board[2] === getActivePlayer().mark &&
-       board[5] === getActivePlayer().mark &&
-       board[8] === getActivePlayer().mark 
+       board[2] === mark &&
+       board[5] === mark &&
+       board[8] === mark 
       ),
       (
-       board[0] === getActivePlayer().mark &&
-       board[4] === getActivePlayer().mark &&
-       board[8] === getActivePlayer().mark 
+       board[0] === mark &&
+       board[4] === mark &&
+       board[8] === mark 
       ),
       (
-       board[2] === getActivePlayer().mark &&
-       board[4] === getActivePlayer().mark &&
-       board[6] === getActivePlayer().mark 
+       board[2] === mark &&
+       board[4] === mark &&
+       board[6] === mark 
       ),
     ]
 
     if (winConditions.filter(condition => condition).length) {
       console.log(`${getActivePlayer().name} won.`);
-      return getActivePlayer().name
+      result = getActivePlayer().name
     }
 
     const availableCells = board.filter(cell => cell === " ")
 
     if (!availableCells.length) {
       console.log("It's a tie!");
-      return "Tie"
+      result = "Tie"
     }
 
     switchPlayerTurn()
   }
 
+  const restart = () => {
+    gameboard.resetBoard()
+    result = undefined
+    activePlayer = players[0]
+  }
+
   gameboard.printBoard()
   console.log(`${getActivePlayer().name}'s turn.`);
 
-  return { playRound, getActivePlayer }
+  return { playRound, getActivePlayer, getResult, restart }
 }
 
-function DisplayController() {
-  const game = GameController("Alice", "Bob")
-  const boardDiv = document.querySelector(".board")
-  const playerTurnDiv = document.querySelector(".player-turn")
+function DisplayController(playerOne, playerTwo) {
+  const form = document.querySelector("form")
+  form.style.display = "none"
+  
+  let game = GameController(playerOne, playerTwo)
 
-  const displayUpdate = (result) => {
+  const boardDiv = document.createElement("div")
+  boardDiv.classList.add("board")
+  document.body.appendChild(boardDiv)
+
+  const playerTurnDiv = document.createElement("div")
+  playerTurnDiv.classList.add("player-turn")
+  document.body.appendChild(playerTurnDiv)
+
+  function restartGame() {
+    restartButton.style.display = "none";
+    game.restart()
+    displayUpdate()
+  }
+
+  const restartButton = document.createElement("button")
+  restartButton.classList.add("restart")
+  restartButton.textContent = "RESTART"
+  restartButton.addEventListener("click", restartGame)
+
+  const displayUpdate = () => {
     boardDiv.textContent = ""
     const board = gameboard.getBoard()
 
@@ -141,35 +176,55 @@ function DisplayController() {
       cellButton.textContent = cell 
       cellButton.dataset.index = index
       boardDiv.appendChild(cellButton)
+      boardDiv.addEventListener("click", displayUpdate)
     })
 
-    if (result) {
+    if (game.getResult() === "Tie") {
+      console.log("It's a tie");
+      playerTurnDiv.textContent = "It's a tie!"
+      restartButton.style.display = "block"
+      document.body.append(restartButton)
+      return
+    }
 
-      if (result === "Tie") {
-        playerTurnDiv.textContent = `It's a tie!`
-        return
-      }
-
-      playerTurnDiv.textContent = `${game.getActivePlayer().name} won!`
+    if (game.getResult()) {
+      console.log(`${game.getResult()} won!`);
+      playerTurnDiv.textContent = `${game.getResult()} won!`
+      restartButton.style.display = "block"
+      document.body.append(restartButton)
       return
     }
 
     playerTurnDiv.textContent = `${game.getActivePlayer().name}'s turn`
-    
   }
 
+    
   function clickHandler(e)   {
+    if (game.getResult()) return
+
     const selectedIndex = e.target.dataset.index
 
     if (!selectedIndex) return
 
-    const result = game.playRound(selectedIndex)
-    displayUpdate(result)
+    game.playRound(selectedIndex)
+    displayUpdate()
   }
 
   boardDiv.addEventListener("click", clickHandler)
-
+  
   displayUpdate()
+
 }
 
-DisplayController()
+function startClickHandler(e) {
+  e.preventDefault()
+  const playerOne = document.querySelector("#player_one_name").value
+  const playerTwo = document.querySelector("#player_two_name").value
+
+  if (!playerOne || !playerTwo) return
+
+  DisplayController(playerOne, playerTwo)
+}
+
+const startButton = document.querySelector("#start")
+startButton.addEventListener("click", startClickHandler)
